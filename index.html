@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .product-title {
+            margin: 0.5rem 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .product-price {
+            font-weight: bold;
+            color: #2c5282;
+            font-size: 1.1rem;
+        }
+
+        .rating {
+            display: flex;
+            gap: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .star {
+            color: #d1d5db;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .star.active {
+            color: #fbbf24;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 1rem;
+            background-color: #2c5282;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .add-to-cart:hover {
+            background-color: #1a365d;
+        }
+
+        /* Styles pour le modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #666;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+
+        .product-features {
+            list-style-type: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+
+        .product-features li {
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .product-features li::before {
+            content: "✓";
+            color: #2c5282;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <section class="products-grid">
+        <!-- Les produits seront générés ici par JavaScript -->
+    </section>
+
+    <!-- Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="modal-grid">
+                <!-- Le contenu du modal sera généré par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            {
+                id: 1,
+                name: "Casque Audio Premium",
+                price: 129.99,
+                image: "/api/placeholder/300/300",
+                rating: 4,
+                description: "Profitez d'une qualité audio exceptionnelle avec ce casque premium. Doté d'une réduction de bruit active et d'une autonomie de 30 heures.",
+                features: [
+                    "Réduction de bruit active",
+                    "Autonomie de 30 heures",
+                    "Connexion Bluetooth 5.0",
+                    "Commandes tactiles",
+                    "Micro intégré"
+                ]
+            },
+            {
+                id: 2,
+                name: "Montre Connectée Sport",
+                price: 199.99,
+                image: "/api/placeholder/300/300",
+                rating: 5,
+                description: "Suivez vos performances sportives avec cette montre connectée. GPS intégré et mesure de la fréquence cardiaque en temps réel.",
+                features: [
+                    "GPS intégré",
+                    "Mesure cardiaque",
+                    "Étanche 50m",
+                    "Écran AMOLED",
+                    "7 jours d'autonomie"
+                ]
+            },
+            {
+                id: 3,
+                name: "Enceinte Bluetooth",
+                price: 79.99,
+                image: "/api/placeholder/300/300",
+                rating: 3,
+                description: "Emportez votre musique partout avec cette enceinte portable. Son puissant et résistante aux éclaboussures.",
+                features: [
+                    "Son stéréo 360°",
+                    "Résistante à l'eau IPX7",
+                    "12h d'autonomie",
+                    "Connexion multiple",
+                    "Micro pour appels"
+                ]
+            },
+            {
+                id: 4,
+                name: "Caméra Action 4K",
+                price: 299.99,
+                image: "/api/placeholder/300/300",
+                rating: 4,
+                description: "Capturez vos aventures en 4K avec cette caméra action. Stabilisation d'image et modes de prise de vue avancés.",
+                features: [
+                    "Vidéo 4K 60fps",
+                    "Stabilisation optique",
+                    "Écran tactile 2.2\"",
+                    "Étanche 10m",
+                    "WiFi intégré"
+                ]
+            }
+        ];
+
+        function createStarRating(rating, productId) {
+            const ratingDiv = document.createElement('div');
+            ratingDiv.className = 'rating';
+            
+            for (let i = 1; i <= 5; i++) {
+                const star = document.createElement('span');
+                star.className = `star ${i <= rating ? 'active' : ''}`;
+                star.innerHTML = '★';
+                star.dataset.value = i;
+                star.dataset.productId = productId;
+                
+                star.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Empêche l'ouverture du modal lors du clic sur une étoile
+                    const value = parseInt(e.target.dataset.value);
+                    const productId = parseInt(e.target.dataset.productId);
+                    updateRating(productId, value);
+                });
+
+                ratingDiv.appendChild(star);
+            }
+            return ratingDiv;
+        }
+
+        function updateRating(productId, newRating) {
+            const productStars = document.querySelectorAll(`.star[data-product-id="${productId}"]`);
+            productStars.forEach((star, index) => {
+                if (index < newRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            console.log(`Produit ${productId} noté ${newRating} étoiles`);
+        }
+
+        function createProductCard(product) {
+            const card = document.createElement('article');
+            card.className = 'product-card';
+            card.dataset.productId = product.id;
+            
+            card.innerHTML = `
+                <img src="${product.image}" alt="${product.name}" class="product-image">
+                <h2 class="product-title">${product.name}</h2>
+                <p class="product-price">${product.price.toFixed(2)} €</p>
+                <button class="add-to-cart">Ajouter au panier</button>
+            `;
+            
+            const rating = createStarRating(product.rating, product.id);
+            card.insertBefore(rating, card.querySelector('.add-to-cart'));
+
+            card.addEventListener('click', () => openModal(product));
+            
+            // Empêcher l'ouverture du modal lors du clic sur le bouton
+            card.querySelector('.add-to-cart').addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('Produit ajouté au panier:', product.name);
+            });
+            
+            return card;
+        }
+
+        function openModal(product) {
+            const modal = document.getElementById('productModal');
+            const modalGrid = modal.querySelector('.modal-grid');
+            
+            modalGrid.innerHTML = `
+                <div class="modal-left">
+                    <img src="${product.image}" alt="${product.name}" class="modal-image">
+                </div>
+                <div class="modal-right">
+                    <h2 class="product-title">${product.name}</h2>
+                    <p class="product-price">${product.price.toFixed(2)} €</p>
+                    ${createStarRating(product.rating, product.id).outerHTML}
+                    <p class="product-description">${product.description}</p>
+                    <ul class="product-features">
+                        ${product.features.map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                    <button class="add-to-cart">Ajouter au panier</button>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('productModal');
+            modal.classList.remove('active');
+        }
+
+        function initializeProducts() {
+            const productsGrid = document.querySelector('.products-grid');
+            products.forEach(product => {
+                productsGrid.appendChild(createProductCard(product));
+            });
+
+            // Gestionnaire pour fermer le modal
+            document.querySelector('.modal-close').addEventListener('click', closeModal);
+            document.getElementById('productModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Initialiser la grille de produits au chargement
+        initializeProducts();
+    </script>
+</body>
+</html>
